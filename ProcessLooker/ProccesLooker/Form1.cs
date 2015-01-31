@@ -13,28 +13,68 @@ namespace ProccesLooker
 {
     public partial class Form1 : Form
     {
+        System.Windows.Forms.Timer _timer;
+        public int currproc = 0;
+        public Timer tmrShow;
+        public int timeLeft = 0;
+        
+
+
         public Form1()
         {
             InitializeComponent();
+            _timer = new System.Windows.Forms.Timer();
+            _timer.Tick += new EventHandler(Timer_Tick);
+            _timer.Interval = 500;
+            _timer.Enabled = true;
+        }
+        
+
+        //Возвращает обновленный массив процессов.
+        public Process[] UpdateProc()
+        {
+             Process[] proceList = Process.GetProcesses();
+             return proceList;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+
+        private void Timer_Tick(object sender, EventArgs e)
         {
-            int update = 1000;
-            List<Procc> listProcc = new List<Procc>();
-            Process[] procList = Process.GetProcesses();
-            foreach (Process pr in procList)
+            
+            if (timeLeft > 0)
             {
-                if (pr.MainWindowTitle!="")
+                timeLeft = timeLeft - 1;
+                int minutes = timeLeft / 60;
+                int seconds = timeLeft - (minutes * 60);
+                if (seconds < 10)
                 {
-                    listProcc.Add(new Procc(pr.Id, pr.MainWindowTitle, pr.StartTime));
+                    lblTimer.Text = minutes + ":0" + seconds;
+                }
+                else
+                {
+                    lblTimer.Text = minutes + ":" + seconds;
                 }
             }
- 
-		 listBox1.DataSource = listProcc;
-
-            
-
+            else
+            {
+                    List<Procc> listProcc = new List<Procc>();
+                    currproc = 0;
+                    Process[] procList = UpdateProc();
+                    foreach (Process pr in procList)
+                    {
+                        if (pr.MainWindowTitle != "")
+                        {
+                            currproc++;
+                            listProcc.Add(new Procc(pr.Id, pr.MainWindowTitle, pr.StartTime));
+                        }
+                    }
+                
+                    listBox1.DataSource = listProcc;
+                    timeLeft = 19;
+                
+            }
         }
+
+
     }
 }
