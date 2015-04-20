@@ -58,6 +58,9 @@ namespace ProccesLooker
             else
             {
                     List<Procc> listProcc = new List<Procc>();
+                    String host = System.Net.Dns.GetHostName();
+                    System.Net.IPAddress ip = System.Net.Dns.GetHostByName(host).AddressList[0];
+                    PCinfo pc = new PCinfo(host, ip.ToString());
                     currproc = 0;
                     Process[] procList = UpdateProc();
                     foreach (Process pr in procList)
@@ -68,11 +71,16 @@ namespace ProccesLooker
                             listProcc.Add(new Procc(pr.Id, pr.MainWindowTitle, pr.StartTime));
                         }
                     }
-                
+                    label1.Text = pc.ToString();
                     listBox1.DataSource = listProcc;
                     timeLeft = 19;
                 
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
 
