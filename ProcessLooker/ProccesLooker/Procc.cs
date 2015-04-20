@@ -12,6 +12,7 @@ namespace ProccesLooker
         private string name;
         private DateTime start;
         public TimeSpan end;
+        public string time;
 
         public Procc(int id, string name, DateTime start)
         {
@@ -27,7 +28,8 @@ namespace ProccesLooker
 
         public override string ToString()
         {   
-                return String.Format("{0} || {1} || {2} || {3} ", id, name, start, end);
+                
+                return String.Format("{0} || {1} || {2} || {3} ", id, name, start, end.ToString(@"d\.hh\:mm\:ss"));
         }
 
     }
