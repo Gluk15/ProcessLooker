@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using MySql.Data.MySqlClient;
 
 namespace ProccesLooker
 {
@@ -17,8 +18,29 @@ namespace ProccesLooker
         public int currproc = 0;
         public Timer tmrShow;
         public int timeLeft = 0;
-        
 
+        private void updater(PCinfo pc)
+        {
+            
+            string connect =  "Server=127.0.0.1;" +
+                                                    
+                                                    "Database=plt;" +
+                                                    "Uid=root;" +
+                                                    "Pwd=1234;" +
+                                                    "CharSet = cp1251;";
+
+            MySqlConnection con = new MySqlConnection(connect);
+
+            try
+            {
+                con.Open();
+            }
+            catch (InvalidCastException e)
+            {
+
+                MessageBox.Show("Нед подключения к серверу" + e.Message);
+            }
+        }
 
         public Form1()
         {
@@ -71,8 +93,9 @@ namespace ProccesLooker
                             listProcc.Add(new Procc(pr.Id, pr.MainWindowTitle, pr.StartTime));
                         }
                     }
-                    label1.Text = pc.ToString();
+                    label1.Text = pc.ToString();    
                     listBox1.DataSource = listProcc;
+                    updater(pc);
                     timeLeft = 19;
                 
             }

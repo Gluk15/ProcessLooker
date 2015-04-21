@@ -8,8 +8,8 @@ namespace ProccesLooker
 {
     class PCinfo
     {
-        private string name;
-        private string ip;
+        public string name;
+        public string ip;
 
         public PCinfo(string name, string ip)
         {
