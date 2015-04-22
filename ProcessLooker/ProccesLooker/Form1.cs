@@ -19,11 +19,27 @@ namespace ProccesLooker
         public Timer tmrShow;
         public int timeLeft = 0;
 
-        private void updater(PCinfo pc)
+        public DataTable createtable()
+        {
+            System.Data.DataTable datatab = new DataTable(DateTime.Today.ToString("d") + System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList[0].ToString());       
+
+            datatab.Columns.Add(new DataColumn("id", System.Type.GetType("System.Int32")));
+            datatab.Columns.Add(new DataColumn("name", System.Type.GetType("System.String")));
+            datatab.Columns.Add(new DataColumn("startTime", System.Type.GetType("System.DateTime")));
+            datatab.Columns.Add(new DataColumn("endTime", System.Type.GetType("System.String")));
+            datatab.Columns.Add(new DataColumn("ip", System.Type.GetType("System.String")));
+
+            DataColumn[] PrimaryKeyColumns = new DataColumn[1];
+            PrimaryKeyColumns[0] = datatab.Columns["id"];
+            datatab.PrimaryKey = PrimaryKeyColumns;
+
+            return datatab;
+        }
+
+        private void updater()
         {
             
-            string connect =  "Server=127.0.0.1;" +
-                                                    
+                                   string connect = "Server=127.0.0.1;" +
                                                     "Database=plt;" +
                                                     "Uid=root;" +
                                                     "Pwd=1234;" +
@@ -38,7 +54,7 @@ namespace ProccesLooker
             catch (InvalidCastException e)
             {
 
-                MessageBox.Show("Нед подключения к серверу" + e.Message);
+                MessageBox.Show("Нет подключения к серверу" + e.Message);
             }
         }
 
@@ -60,7 +76,7 @@ namespace ProccesLooker
         }
 
 
-        private void Timer_Tick(object sender, EventArgs e)
+        public void Timer_Tick(object sender, EventArgs e)
         {
             
             if (timeLeft > 0)
@@ -79,24 +95,32 @@ namespace ProccesLooker
             }
             else
             {
-                    List<Procc> listProcc = new List<Procc>();
-                    String host = System.Net.Dns.GetHostName();
-                    System.Net.IPAddress ip = System.Net.Dns.GetHostByName(host).AddressList[0];
-                    PCinfo pc = new PCinfo(host, ip.ToString());
-                    currproc = 0;
-                    Process[] procList = UpdateProc();
+                DataRow row;
+                DataSet DS = new DataSet();
+                
+                System.Net.IPAddress ip = System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList[0];
+                currproc = 0;
+                DataTable table = createtable();
+                Process[] procList = UpdateProc();
                     foreach (Process pr in procList)
                     {
                         if (pr.MainWindowTitle != "")
                         {
                             currproc++;
-                            listProcc.Add(new Procc(pr.Id, pr.MainWindowTitle, pr.StartTime));
+                            row = table.NewRow();
+                            row["id"] = pr.Id;
+                            row["name"] = pr.MainWindowTitle;
+                            row["startTime"] = pr.StartTime;
+                            row["endTime"] = DateTime.Now.Subtract(pr.StartTime).ToString(@"d\.hh\:mm\:ss");
+                            row["ip"] = ip.ToString();
+                            table.Rows.Add(row);
                         }
                     }
-                    label1.Text = pc.ToString();    
-                    listBox1.DataSource = listProcc;
-                    updater(pc);
-                    timeLeft = 19;
+                label1.Text = ip.ToString();
+                DS.Tables.Add(table);
+                dataGridView1.DataSource = DS.Tables[0];
+                updater();
+                timeLeft = 19;
                 
             }
         }
