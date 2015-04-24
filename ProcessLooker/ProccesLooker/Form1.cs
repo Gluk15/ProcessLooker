@@ -19,13 +19,19 @@ namespace ProccesLooker
         public Timer tmrShow;
         public int timeLeft = 0;
 
+        String tname = DateTime.Today.ToString("d-MMM-yyyy") + ":" + System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList[0].ToString().Replace('.', '-');
+
+         
+
+
+
         public DataTable createtable()
         {
             System.Data.DataTable datatab = new DataTable(DateTime.Today.ToString("d") + System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList[0].ToString());       
 
             datatab.Columns.Add(new DataColumn("id", System.Type.GetType("System.Int32")));
             datatab.Columns.Add(new DataColumn("name", System.Type.GetType("System.String")));
-            datatab.Columns.Add(new DataColumn("startTime", System.Type.GetType("System.DateTime")));
+            datatab.Columns.Add(new DataColumn("startTime", System.Type.GetType("System.String")));
             datatab.Columns.Add(new DataColumn("endTime", System.Type.GetType("System.String")));
             datatab.Columns.Add(new DataColumn("ip", System.Type.GetType("System.String")));
 
@@ -36,35 +42,39 @@ namespace ProccesLooker
             return datatab;
         }
 
-        private void updater()
-        {
-            
-                                   string connect = "Server=127.0.0.1;" +
-                                                    "Database=plt;" +
-                                                    "Uid=root;" +
-                                                    "Pwd=1234;" +
-                                                    "CharSet = cp1251;";
-
-            MySqlConnection con = new MySqlConnection(connect);
-
-            try
-            {
-                con.Open();
-            }
-            catch (InvalidCastException e)
-            {
-
-                MessageBox.Show("Нет подключения к серверу" + e.Message);
-            }
-        }
 
         public Form1()
         {
             InitializeComponent();
+            string connect = "Server=127.0.0.1;" +
+                                    "Database=plt;" +
+                                    "Uid=root;" +
+                                    "Pwd=1234;" +
+                                    "CharSet = cp1251;";
+
+            MySqlConnection con = new MySqlConnection(connect);
+            MySqlCommand com = new MySqlCommand();
+            com.Connection = con;
+
+            try
+            {
+                con.Open();
+                com.CommandText = @"CREATE TABLE IF NOT EXISTS `" + tname + "`  ( `id` MEDIUMINT NOT NULL, `name` TEXT NOT NULL, `StartTime` TEXT NOT NULL, `EndTime` TEXT NOT NULL, `ip` TEXT NOT NULL, PRIMARY KEY (`id`))COLLATE='utf8_general_ci' ENGINE=InnoDB;";
+                com.ExecuteReader();
+
+
+
+            }
+            catch (MySqlException SSDB_Exception)
+            {
+
+                MessageBox.Show("Ошибка при создании таблицы " + tname + ":\n" + SSDB_Exception.Message);
+            }
             _timer = new System.Windows.Forms.Timer();
             _timer.Tick += new EventHandler(Timer_Tick);
             _timer.Interval = 500;
             _timer.Enabled = true;
+
         }
         
 
@@ -97,30 +107,41 @@ namespace ProccesLooker
             {
                 DataRow row;
                 DataSet DS = new DataSet();
+                DataTable st = new DataTable();
+                DataTable table = createtable();
                 
                 System.Net.IPAddress ip = System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList[0];
-                currproc = 0;
-                DataTable table = createtable();
+                
+
                 Process[] procList = UpdateProc();
-                    foreach (Process pr in procList)
+
+               
+
+
+
+                foreach (Process pr in procList)
+                {
+                    if (pr.MainWindowTitle != "")
                     {
-                        if (pr.MainWindowTitle != "")
-                        {
-                            currproc++;
-                            row = table.NewRow();
-                            row["id"] = pr.Id;
-                            row["name"] = pr.MainWindowTitle;
-                            row["startTime"] = pr.StartTime;
-                            row["endTime"] = DateTime.Now.Subtract(pr.StartTime).ToString(@"d\.hh\:mm\:ss");
-                            row["ip"] = ip.ToString();
-                            table.Rows.Add(row);
-                        }
+                        row = table.NewRow();
+                        row["id"] = pr.Id;
+                        row["name"] = pr.MainWindowTitle;
+                        row["startTime"] = pr.StartTime;
+                        row["endTime"] = DateTime.Now.Subtract(pr.StartTime).ToString(@"d\.hh\:mm\:ss");
+                        row["ip"] = ip.ToString();
+                        table.Rows.Add(row);
                     }
+                }
+
+
+
+
+                
+                   
                 label1.Text = ip.ToString();
                 DS.Tables.Add(table);
                 dataGridView1.DataSource = DS.Tables[0];
-                updater();
-                timeLeft = 19;
+                timeLeft = 30;
                 
             }
         }
