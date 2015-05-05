@@ -20,10 +20,10 @@ namespace ProccesLooker
         public Timer tmrShow;
         public int timeLeft = 0;
 
-        String connStr = @"Data Source = \\.\pipe\MSSQL$SQLEXPRESS\sql\query;
+        String connStr = @"Data Source =  192.168.1.39;
                             Initial Catalog = BD;
                             Integrated Security = False;
-                            UID = root;
+                            UID = sa;
                             PWD = qweasd;";
 
 
@@ -103,7 +103,7 @@ namespace ProccesLooker
                                                 " ELSE"+
                                                 " BEGIN"+
                                                 " Insert into main" +
-                                                "(ID, ip, name, StartTime, EndTime) Values ('" + idrs + "', '" + ip + "', '" + pr.MainWindowTitle.ToString() + "', '" + pr.StartTime + "', '" + DateTime.Now.ToString() + "')"+
+                                                "(ID, ip, name,StartDate, StartTime, EndTime) Values ('" + idrs + "', '" + ip + "', '" + pr.MainWindowTitle.ToString() + "', '" + pr.StartTime.ToString(@"dd.MM.yyyy") + "', '" + pr.StartTime.ToString(@"HH:mm:ss") + "', '" + DateTime.Now.ToString() + "')" +
                                                 "END" , conn);
 
                             try
